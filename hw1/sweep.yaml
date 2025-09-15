@@ -1,0 +1,55 @@
+program: train.py
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --data_root
+  - data
+  - --output_dir
+  - output
+  - --use_vocals_only
+  - --vocals_root
+  - data/artist20_vocals
+  - --wandb
+method: bayes
+metric:
+  name: val/top1
+  goal: maximize
+parameters:
+  lr:
+    values: [0.0001]
+  weight_decay:
+    values: [0.0001, 0.0003, 0.001]
+  batch_size:
+    values: [16]
+  epochs:
+    values: [500]
+  num_workers:
+    values: [4]
+  chunk_sec:
+    values: [2.0, 3.0, 4.0]
+  overlap:
+    values: [0.25, 0.5, 0.75]
+  # Eval-time speed/quality controls
+  eval_overlap:
+    values: [0.25, 0.5, 0.75]
+  eval_batch_size:
+    values: [64]
+  eval_max_segments:
+    values: [32]
+  # LR scheduler (Cosine by default)
+  lr_scheduler:
+    values: ["cosine"]
+  cosine_eta_min:
+    values: [1.0e-6, 1.0e-5]
+  warmup_epochs:
+    values: [20, 40]
+  eval_every:
+    values: [20]
+  # Model capacity search
+  depth:
+    values: [6]
+  base_channels:
+    values: [64]
+  seed:
+    values: [42]

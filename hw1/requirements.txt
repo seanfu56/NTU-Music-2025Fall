@@ -1,0 +1,12 @@
+torch==2.7.1
+torchvision==0.22.1
+torchaudio==2.7.1
+librosa==0.11.0
+scikit-learn==1.5.2
+joblib==1.4.2
+tqdm==4.66.5
+wandb==0.17.9
+PyYAML==6.0.2
+tqdm
+matplotlib==3.9.2
+demucs==4.0.1
