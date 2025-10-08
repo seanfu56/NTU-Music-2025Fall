@@ -270,6 +270,10 @@ def load_split_list(dataset_dir: Path, json_name: str) -> Tuple[List[str], List[
     labels: List[str] = []
     for rel in rel_list:
         p = dataset_dir / rel.lstrip("./")
+        p = p.with_suffix('.wav')
+        # print(p)
+
+        # assert False
         if not p.exists():
             print(f"[warn] Missing file listed in {json_name}: {rel}")
             continue
@@ -394,10 +398,10 @@ def train_one_epoch(
 
 def main():
     parser = argparse.ArgumentParser(description="CNN+Transformer singer classifier (PyTorch)")
-    parser.add_argument("--data_root", type=str, default=str(Path(__file__).resolve().parent / "data"))
+    parser.add_argument("--data_root", type=str, default="data")
     parser.add_argument("--dataset_subdir", type=str, default="artist20_vocals")
-    parser.add_argument("--output_dir", type=str, default=str(Path(__file__).resolve().parent / "output"))
-    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--output_dir", type=str, default="output")
+    parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--lr", type=float, default=3e-5)
     parser.add_argument("--weight_decay", type=float, default=3e-4)
@@ -417,10 +421,10 @@ def main():
     parser.add_argument("--depth", type=int, default=6)
     parser.add_argument("--base_channels", type=int, default=64)
     parser.add_argument("--d_model", type=int, default=256)
-    parser.add_argument("--tx_layers", type=int, default=6)
+    parser.add_argument("--tx_layers", type=int, default=8)
     parser.add_argument("--tx_heads", type=int, default=8)
     parser.add_argument("--tx_ff", type=int, default=512)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.3)
     # Augmentation
     parser.add_argument("--augment", action="store_true", default=True)
     parser.add_argument("--no_augment", action="store_false", dest="augment")
@@ -495,7 +499,7 @@ def main():
     train_loader = DataLoader(
         train_ds,
         batch_size=args.batch_size,
-        shuffle=(train_sampler is None),
+        # shuffle=(train_sampler is None),
         sampler=train_sampler,
         num_workers=args.num_workers,
         pin_memory=True,

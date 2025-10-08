@@ -5,7 +5,12 @@ __pycache__/
 
 # C extensions
 *.so
-
+output_w2v2/
+data_demucs/
+data_val_demucs/
+figure/
+*.json
+*.pt
 # Distribution / packaging
 .Python
 build/

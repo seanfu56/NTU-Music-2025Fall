@@ -17,6 +17,8 @@ from tqdm import tqdm
 TARGET_SR = 16000
 
 
+
+
 def read_split_list(artist20_dir: Path, json_name: str) -> List[Path]:
     p = artist20_dir / json_name
     if not p.exists():
@@ -178,6 +180,8 @@ def main():
     # Mirror JSONs for completeness
     ensure_jsons(src_artist20, dst_artist20)
 
+    tic = os.times()
+
     if args.method == "demucs":
         method_demucs(inputs, src_artist20, dst_artist20, args.demucs_model, args.jobs)
     else:
@@ -187,6 +191,8 @@ def main():
     print("Train with:")
     print(f"  python train.py --data_root {data_root} --use_vocals_only --vocals_root {dst_artist20}")
 
+    toc = os.times()
+    print(f"Time cost: {toc[4]-tic[4]:.1f} sec")
 
 if __name__ == "__main__":
     main()

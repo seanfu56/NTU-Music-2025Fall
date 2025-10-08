@@ -256,12 +256,20 @@ def predict_track_from_wav(
         return torch.median(logprobs, dim=0).values
     return logprobs.mean(dim=0)
 
+# 放在檔案前面任一合適位置
+def list_audio_files_recursive(root: Path,
+                               exts=(".wav", ".mp3", ".flac", ".m4a", ".ogg")) -> list[Path]:
+    exts = tuple(e.lower() for e in exts)
+    files = [p for p in root.rglob("*") if p.is_file() and p.suffix.lower() in exts]
+    # 讓結果穩定可重現
+    files.sort(key=lambda p: str(p).lower())
+    return files
+
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate CNN+Transformer on test set (vocals-only mapping)")
     parser.add_argument("--ckpt", type=str, required=True, help="Path to best_model.pt from training")
-    parser.add_argument("--data_root", type=str, default=str(Path(__file__).resolve().parent / "data"))
-    parser.add_argument("--dataset_subdir", type=str, default="artist20_vocals", help="Root of original/test data")
+    parser.add_argument("--data", type=str, required=True, help="Directory that directly contains test audio files (.wav/.mp3)")
     parser.add_argument("--output", type=str, default=None, help="Output predictions JSON path (default next to ckpt)")
     # Vocals separation
     parser.add_argument("--use_vocals_only", action="store_true",
@@ -270,7 +278,7 @@ def main():
     parser.add_argument("--depth", type=int, default=6)
     parser.add_argument("--base_channels", type=int, default=64)
     parser.add_argument("--d_model", type=int, default=256)
-    parser.add_argument("--tx_layers", type=int, default=6)
+    parser.add_argument("--tx_layers", type=int, default=8)
     parser.add_argument("--tx_heads", type=int, default=8)
     parser.add_argument("--tx_ff", type=int, default=512)
     parser.add_argument("--dropout", type=float, default=0.1)
@@ -312,14 +320,13 @@ def main():
     model.load_state_dict(sd, strict=True)
     model.eval()
 
-    data_root = Path(args.data_root)
-    dataset_dir = data_root / args.dataset_subdir
-    if not dataset_dir.exists():
-        raise SystemExit(f"Dataset dir not found: {dataset_dir}")
-    test_dir = dataset_dir / "test"
-    test_files = sorted(list(test_dir.glob("*.wav")) + list(test_dir.glob("*.mp3")))
+    data_dir = Path(args.data)
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise SystemExit(f"Data dir not found or not a directory: {data_dir}")
+
+    test_files = list_audio_files_recursive(data_dir)  # <<< 遞迴抓所有子資料夾
     if not test_files:
-        raise SystemExit(f"No test audio found under {test_dir}")
+        raise SystemExit(f"No test audio found under {data_dir}")
 
     pred: Dict[str, List[str]] = {}
     for p in tqdm(test_files, desc="Test", ncols=80):
@@ -337,13 +344,12 @@ def main():
             agg=str(args.eval_agg),
         )
         topk = torch.topk(logp, k=min(3, n_classes)).indices.tolist()
-        pred[p.stem] = [inv_label[i] for i in topk]
+        pred[str(os.path.basename(p)).split('.')[0]] = [inv_label[i] for i in topk]
 
-    out_path = Path(args.output) if args.output else (ckpt_path.parent / "test_pred.json")
+    out_path = Path(args.output) if args.output else (ckpt_path.parent / "r14942078.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(pred, f, ensure_ascii=False, indent=2)
     print(f"Wrote predictions to {out_path}")
-
 
 if __name__ == "__main__":
     main()

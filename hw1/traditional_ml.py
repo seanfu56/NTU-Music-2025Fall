@@ -9,10 +9,13 @@ import librosa
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 from joblib import dump
 from tqdm import tqdm
 from sklearn.decomposition import PCA
+
+# NEW: for plotting confusion matrix
+import matplotlib.pyplot as plt
 
 
 def _features_from_y(
@@ -179,10 +182,7 @@ def load_split_list(base_dir: Path, json_name: str) -> Tuple[List[str], List[str
     full_paths: List[str] = []
     labels: List[str] = []
     for rel in rel_list:
-        print(base_dir)
         p = base_dir / rel.lstrip("./")
-        print(p)
-        # assert False
         if not p.exists():
             print(f"[warn] Missing file listed in {json_name}: {rel}")
             continue
@@ -291,7 +291,6 @@ def run(args: argparse.Namespace) -> None:
     train_paths, y_train = load_split_list(artist20_dir, "train.json")
     val_paths, y_val = load_split_list(artist20_dir, "val.json")
 
-    print(len(train_paths), len(val_paths))
     if not train_paths or not val_paths:
         raise FileNotFoundError("Empty train/val lists from JSON. Check data_root and JSON contents.")
 
@@ -364,14 +363,46 @@ def run(args: argparse.Namespace) -> None:
     top3_labels = [[classes[j] for j in row] for row in top3_idx]
     acc_top3 = float(np.mean([yt in preds for yt, preds in zip(y_val_true, top3_labels)]))
 
-    print(f"Train Top-1 Acc: {acc_top1_train:.4f}")
-    print(f"Train Top-3 Acc: {acc_top3_train:.4f}")
-    print(f"Validation Top-1 Acc: {acc_top1:.4f}")
-    print(f"Validation Top-3 Acc: {acc_top3:.4f}")
+    # === NEW: print clear validation metrics ===
+    # === NEW: print clear validation metrics (Top-1 / Top-3) ===
+    print(f"\n[Validation] Top-1 Acc: {acc_top1:.4f}")
+    print(f"[Validation] Top-3 Acc: {acc_top3:.4f}")
+
+    # Use consistent, sorted label order everywhere
+    classes_svm = list(model.named_steps["svm"].classes_)   # 原始訓練類別順序（用來把索引轉字串）
+    labels_sorted = sorted(classes_svm)                      # 顯示與混淆矩陣一律採用排序後的名稱
+
+    # === NEW: classification report (per-file) in sorted label order ===
     try:
-        print(classification_report(y_val, y_val_pred))
-    except Exception:
-        pass
+        print("\n[Validation] Classification report (per-file, sorted labels):")
+        print(classification_report(
+            y_val_true, y_val_pred_file,
+            labels=labels_sorted, target_names=labels_sorted, zero_division=0
+        ))
+    except Exception as e:
+        print(f"[warn] classification_report failed: {e}")
+
+    # === NEW: Confusion matrix (per-file) — use probabilities (row-normalized), sorted labels ===
+    try:
+        # normalize='true' → 每一列（真實類別）總和為 1 → 機率
+        cm = confusion_matrix(
+            y_val_true, y_val_pred_file,
+            labels=labels_sorted, normalize='true'
+        )
+        cm_pct = cm * 100.0  # 轉百分比方便閱讀
+
+        fig = plt.figure(figsize=(max(6, len(labels_sorted)*0.6), max(5, len(labels_sorted)*0.5)))
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm_pct, display_labels=labels_sorted)
+        # values_format='.1f' 會以 1 位小數顯示（數值已是百分比）
+        disp.plot(include_values=True, cmap="Blues", xticks_rotation=45, colorbar=True, ax=plt.gca(), values_format=".1f")
+        plt.title("Validation Confusion Matrix (row-normalized, %)")
+        plt.tight_layout()
+        out_png = output_dir / "val_confusion_matrix.png"
+        plt.savefig(out_png, dpi=200)
+        plt.close(fig)
+        print(f"[Validation] Confusion matrix saved to: {out_png}")
+    except Exception as e:
+        print(f"[warn] confusion matrix plotting failed: {e}")
 
     # 6) Optional sanity check: shuffled labels training
     if args.sanity_shuffle_labels:

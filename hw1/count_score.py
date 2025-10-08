@@ -15,6 +15,7 @@ with open(pred_path, 'r') as f:
 top1_correct = 0
 top3_correct = 0
 
+
 for k in list(preds.keys()):
     ans = answers[int(k)-1]
     pred = preds[k]
