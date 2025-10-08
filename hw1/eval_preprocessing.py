@@ -85,7 +85,7 @@ def main():
         description="針對 data_root 底下所有 .mp3，輸出人聲至 out_dir（保留目錄結構，可用 GPU）"
     )
     ap.add_argument("--data_root", required=True, type=str, help="輸入資料夾 (遞迴搜尋 .mp3)")
-    ap.add_argument("--out_dir", required=True, type=str, help="輸出資料夾")
+    ap.add_argument("--out_dir", default='data_demucs', type=str, help="輸出資料夾")
     ap.add_argument("--device", type=str, default="auto", choices=["auto", "cuda", "cpu"],
                     help="推論裝置（預設 auto：有 GPU 則用 cuda）")
     ap.add_argument("--jobs", type=int, default=2, help="CPU 並行數（解碼/IO），GPU 不會因 jobs 提升")

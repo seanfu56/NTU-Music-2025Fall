@@ -269,7 +269,7 @@ def list_audio_files_recursive(root: Path,
 def main():
     parser = argparse.ArgumentParser(description="Evaluate CNN+Transformer on test set (vocals-only mapping)")
     parser.add_argument("--ckpt", type=str, required=True, help="Path to best_model.pt from training")
-    parser.add_argument("--data", type=str, required=True, help="Directory that directly contains test audio files (.wav/.mp3)")
+    parser.add_argument("--data", type=str, default='data_demucs', help="Directory that directly contains test audio files (.wav/.mp3)", )
     parser.add_argument("--output", type=str, default=None, help="Output predictions JSON path (default next to ckpt)")
     # Vocals separation
     parser.add_argument("--use_vocals_only", action="store_true",

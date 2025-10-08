@@ -10,3 +10,4 @@ PyYAML==6.0.2
 tqdm
 matplotlib==3.9.2
 demucs==4.0.1
+gdown
