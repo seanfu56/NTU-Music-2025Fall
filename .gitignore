@@ -2,7 +2,7 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
+Deep_MIR_hw2
 # C extensions
 *.so
 output_w2v2/
@@ -90,8 +90,11 @@ ipython_config.py
 wandb/
 data/
 label/
-output/
+# output/
 *.zip
+*.mp3
+checkpoints/
+*.wav
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
