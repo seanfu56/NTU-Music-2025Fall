@@ -3,11 +3,11 @@ import json
 import os
 
 from benchmark import clap, aesthetics, melody
-import generators
+import generative_models
 
 def main():
 
-    encoder_list = getattr(generators, "__all__", [])
+    encoder_list = getattr(generative_models, "__all__", [])
 
     clap_model = clap.CLAP()
     aesthetics_model = aesthetics.Aesthetics()
