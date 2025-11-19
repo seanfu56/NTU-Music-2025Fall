@@ -1,0 +1,9 @@
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_1_cp.npy -n 1 -o output/t2/song1_cp_mb --temperature 2.0 --top_p 0.7
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_1_cp.npy -n 1 -o output/t2/song1_cp_mb --temperature 1.0 --top_p 0.5
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_1_cp.npy -n 1 -o output/t2/song1_cp_mb --temperature 3.0 --top_p 0.99
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_2_cp.npy -n 1 -o output/t2/song2_cp_mb --temperature 2.0 --top_p 0.7
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_2_cp.npy -n 1 -o output/t2/song2_cp_mb --temperature 1.0 --top_p 0.5
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_2_cp.npy -n 1 -o output/t2/song2_cp_mb --temperature 3.0 --top_p 0.99
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_3_cp.npy -n 1 -o output/t2/song3_cp_mb --temperature 2.0 --top_p 0.7
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_3_cp.npy -n 1 -o output/t2/song3_cp_mb --temperature 1.0 --top_p 0.5
+python src/inference_mamba_cp.py --cond --cond_file prompt_song/song_3_cp.npy -n 1 -o output/t2/song3_cp_mb --temperature 3.0 --top_p 0.99

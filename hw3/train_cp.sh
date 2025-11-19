@@ -1,0 +1,1 @@
+python src/train_cp.py --config config/config_cp.yml
