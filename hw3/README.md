@@ -5,11 +5,11 @@
 nvcc==12.8
 
 ```bash=
-conda create -n music-hw3 python=3.10
+conda create -n music-hw3 python=3.12
 conda activate music-hw3
 conda install conda-forge::fluidsynth
 pip install -r requirements.txt
-pip install pytorch-fast-transformers
+pip install --no-build-isolation pytorch-fast-transformers
 ```
 
 ## Download Dataset
